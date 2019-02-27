@@ -9,8 +9,11 @@ const (
 	// DefaultKFactor is ...
 	DefaultKFactor = 32
 
-	//DefaultDeviation is ...
+	// DefaultDeviation is ...
 	DefaultDeviation = 400
+
+	// DefaultInitialRanking is ...
+	DefaultInitialRanking = 1500
 )
 
 // Player is ...
@@ -21,7 +24,7 @@ type Player struct {
 
 // Parameters is ...
 type Parameters struct {
-	K, D float64
+	K, D, InitialRanking float64
 }
 
 // Outcome is ...
@@ -31,7 +34,7 @@ type Outcome struct {
 
 // NewPlayer is ...
 func NewPlayer(p Parameters) *Player {
-	return &Player{Ranking: 1500, Parameters: p}
+	return &Player{Ranking: p.InitialRanking, Parameters: p}
 }
 
 // Win is ...

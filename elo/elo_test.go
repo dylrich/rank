@@ -4,8 +4,9 @@ import "testing"
 
 func TestWinLoseDraw(t *testing.T) {
 	p := Parameters{
-		K: DefaultKFactor,
-		D: DefaultDeviation,
+		K:              DefaultKFactor,
+		D:              DefaultDeviation,
+		InitialRanking: DefaultInitialRanking,
 	}
 	player1 := NewPlayer(p)
 	player2 := NewPlayer(p)
