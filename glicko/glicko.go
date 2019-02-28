@@ -9,39 +9,44 @@ const (
 	//DefaultInitialRD is ...
 	DefaultInitialRD = 350
 
-	// DefaultInitialRanking is ...
-	DefaultInitialRanking = 1500
+	// DefaultInitialRating is ...
+	DefaultInitialRating = 1500
 )
 
 var (
 	q = math.Ln10 / 400
 )
 
+// Result is ...
+type Result struct {
+	Rating, RD, GRD, E, Score float64
+}
+
 // Player is ...
 type Player struct {
-	Ranking float64
-	RD      float64
-
+	Rating     float64
+	RD         float64
+	History    []Result
 	Parameters Parameters
 }
 
 // Parameters is ...
 type Parameters struct {
-	InitialRD, InitialRanking, C float64
+	InitialRD, InitialRating, C float64
 }
 
 // Outcome is ...
 type Outcome struct {
-	Ranking, Delta float64
+	Rating, Delta float64
 }
 
 // NewPlayer is ...
 func NewPlayer(p Parameters) *Player {
-	if &p.InitialRD == nil || &p.InitialRanking == nil {
+	if &p.InitialRD == nil || &p.InitialRating == nil {
 		p.InitialRD = 350
-		p.InitialRanking = 1500
+		p.InitialRating = 1500
 	}
-	return &Player{Ranking: p.InitialRanking, RD: p.InitialRD, Parameters: p}
+	return &Player{Rating: p.InitialRating, RD: p.InitialRD, Parameters: p}
 }
 
 // Win is ...
@@ -50,9 +55,19 @@ func (p *Player) Win(o *Player) *Outcome {
 	return &outcome
 }
 
-// func (p *Player) dsquared() float64 {
-// 	math.Pow(q, 2)
-// }
+func (p *Player) addResult(o *Player) {
+	var r Result
+	r.RD = o.RD
+	r.Rating = o.Rating
+}
+
+func (p *Player) dsquared() float64 {
+	math.Pow(q, 2)
+}
+
+func impact(grd, e float64) float64 {
+
+}
 
 func (p *Player) gRD() float64 {
 	return 1 / math.Sqrt(1+(3*math.Pow(q, 2)*math.Pow(p.RD, 2)/math.Pow(math.Pi, 2)))

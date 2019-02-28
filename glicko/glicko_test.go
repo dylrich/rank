@@ -7,8 +7,8 @@ import (
 
 func TestGRD(t *testing.T) {
 	p := Parameters{
-		InitialRD:      30,
-		InitialRanking: DefaultInitialRanking,
+		InitialRD:     30,
+		InitialRating: DefaultInitialRating,
 	}
 	player := NewPlayer(p)
 	grd := player.gRD()
@@ -18,8 +18,8 @@ func TestGRD(t *testing.T) {
 	}
 
 	p = Parameters{
-		InitialRD:      100,
-		InitialRanking: DefaultInitialRanking,
+		InitialRD:     100,
+		InitialRating: DefaultInitialRating,
 	}
 	player = NewPlayer(p)
 	grd = player.gRD()
@@ -29,8 +29,8 @@ func TestGRD(t *testing.T) {
 	}
 
 	p = Parameters{
-		InitialRD:      300,
-		InitialRanking: DefaultInitialRanking,
+		InitialRD:     300,
+		InitialRating: DefaultInitialRating,
 	}
 	player = NewPlayer(p)
 	grd = player.gRD()

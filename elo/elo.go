@@ -12,29 +12,29 @@ const (
 	// DefaultDeviation is ...
 	DefaultDeviation = 400
 
-	// DefaultInitialRanking is ...
-	DefaultInitialRanking = 1500
+	// DefaultInitialRating is ...
+	DefaultInitialRating = 1500
 )
 
 // Player is ...
 type Player struct {
-	Ranking    float64
+	Rating     float64
 	Parameters Parameters
 }
 
 // Parameters is ...
 type Parameters struct {
-	K, D, InitialRanking float64
+	K, D, InitialRating float64
 }
 
 // Outcome is ...
 type Outcome struct {
-	Ranking, Delta float64
+	Rating, Delta float64
 }
 
 // NewPlayer is ...
 func NewPlayer(p Parameters) *Player {
-	return &Player{Ranking: p.InitialRanking, Parameters: p}
+	return &Player{Rating: p.InitialRating, Parameters: p}
 }
 
 // Win is ...
@@ -42,10 +42,10 @@ func (p *Player) Win(o *Player) *Outcome {
 	t := p.transform()
 	e := p.expectation(t, o.transform())
 	delta := p.delta(e, 1)
-	p.Ranking = delta + p.Ranking
+	p.Rating = delta + p.Rating
 	return &Outcome{
-		Ranking: p.Ranking,
-		Delta:   delta,
+		Rating: p.Rating,
+		Delta:  delta,
 	}
 }
 
@@ -54,10 +54,10 @@ func (p *Player) Lose(o *Player) *Outcome {
 	t := p.transform()
 	e := p.expectation(t, o.transform())
 	delta := p.delta(e, 0)
-	p.Ranking = delta + p.Ranking
+	p.Rating = delta + p.Rating
 	return &Outcome{
-		Ranking: p.Ranking,
-		Delta:   delta,
+		Rating: p.Rating,
+		Delta:  delta,
 	}
 }
 
@@ -66,10 +66,10 @@ func (p *Player) Draw(o *Player) *Outcome {
 	t := p.transform()
 	e := p.expectation(t, o.transform())
 	delta := p.delta(e, .5)
-	p.Ranking = delta + p.Ranking
+	p.Rating = delta + p.Rating
 	return &Outcome{
-		Ranking: p.Ranking,
-		Delta:   delta,
+		Rating: p.Rating,
+		Delta:  delta,
 	}
 }
 
@@ -78,7 +78,7 @@ func (p *Player) delta(e, s float64) float64 {
 }
 
 func (p *Player) transform() float64 {
-	return math.Pow(10, (p.Ranking / p.Parameters.D))
+	return math.Pow(10, (p.Rating / p.Parameters.D))
 }
 
 func (p *Player) expectation(t1, t2 float64) float64 {
