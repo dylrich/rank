@@ -55,17 +55,30 @@ func (p *Player) Win(o *Player) *Outcome {
 	return &outcome
 }
 
-func (p *Player) addResult(o *Player) {
+func (p *Player) addWin(o *Player) {
 	var r Result
 	r.RD = o.RD
 	r.Rating = o.Rating
+	r.Score = 1
+	r.GRD = o.gRD()
+	r.E = p.e(o)
 }
 
-func (p *Player) dsquared() float64 {
-	math.Pow(q, 2)
+func (p *Player) e(o *Player) float64 {
+	return 1 / (1 + math.Pow(10, (-o.gRD()*ratingDelta(p.Rating, o.Rating)/400)))
 }
+
+func ratingDelta(r1, r2 float64) float64 {
+	return r1 - r2
+}
+
+// func (p *Player) dsquared() float64 {
+// 	math.Pow(q, 2)
+// }
 
 func impact(grd, e float64) float64 {
+
+	return grd
 
 }
 
