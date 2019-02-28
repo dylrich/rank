@@ -1,39 +1,42 @@
 package glicko
 
 import (
+	"log"
 	"math"
 	"testing"
 )
 
-func TestGRD(t *testing.T) {
-	p := Parameters{
-		InitialRD:     30,
+var (
+	p1 = NewPlayer(Parameters{
+		InitialRD:     DefaultInitialRD,
 		InitialRating: DefaultInitialRating,
-	}
-	player := NewPlayer(p)
-	grd := player.gRD()
+	})
+	p2 = NewPlayer(Parameters{
+		InitialRD:     30,
+		InitialRating: 1400,
+	})
+	p3 = NewPlayer(Parameters{
+		InitialRD:     100,
+		InitialRating: 1550,
+	})
+	p4 = NewPlayer(Parameters{
+		InitialRD:     300,
+		InitialRating: 1700,
+	})
+)
+
+func TestGRD(t *testing.T) {
+	grd := p2.gRD()
 	if math.Abs(grd-0.9955) > .0001 {
 		t.Log(grd)
 		t.Fail()
 	}
-
-	p = Parameters{
-		InitialRD:     100,
-		InitialRating: DefaultInitialRating,
-	}
-	player = NewPlayer(p)
-	grd = player.gRD()
+	grd = p3.gRD()
 	if math.Abs(grd-0.9531) > .0001 {
 		t.Log(grd)
 		t.Fail()
 	}
-
-	p = Parameters{
-		InitialRD:     300,
-		InitialRating: DefaultInitialRating,
-	}
-	player = NewPlayer(p)
-	grd = player.gRD()
+	grd = p4.gRD()
 	if math.Abs(grd-0.7242) > .0001 {
 		t.Log(grd)
 		t.Fail()
@@ -41,51 +44,32 @@ func TestGRD(t *testing.T) {
 }
 
 func TestE(t *testing.T) {
-	p := Parameters{
-		InitialRD:     350,
-		InitialRating: DefaultInitialRating,
-	}
-	op := Parameters{
-		InitialRD:     30,
-		InitialRating: 1400,
-	}
-	player1 := NewPlayer(p)
-	player2 := NewPlayer(op)
-	e := player1.e(player2)
+	e := p1.e(p2)
 	if math.Abs(e-0.639) > .001 {
 		t.Log(e)
 		t.Fail()
 	}
-
-	p = Parameters{
-		InitialRD:     350,
-		InitialRating: DefaultInitialRating,
-	}
-	op = Parameters{
-		InitialRD:     100,
-		InitialRating: 1550,
-	}
-	player1 = NewPlayer(p)
-	player2 = NewPlayer(op)
-	e = player1.e(player2)
+	e = p1.e(p2)
 	if math.Abs(e-0.432) > .001 {
 		t.Log(e)
 		t.Fail()
 	}
-
-	p = Parameters{
-		InitialRD:     350,
-		InitialRating: DefaultInitialRating,
-	}
-	op = Parameters{
-		InitialRD:     300,
-		InitialRating: 1700,
-	}
-	player1 = NewPlayer(p)
-	player2 = NewPlayer(op)
-	e = player1.e(player2)
+	e = p1.e(p2)
 	if math.Abs(e-0.303) > .001 {
 		t.Log(e)
+		t.Fail()
+	}
+}
+
+func TestDSquared(t *testing.T) {
+	p1.addResult(p2, 1)
+	p1.addResult(p3, 0)
+	p1.addResult(p4, 0)
+	ds := p1.dsquared()
+
+	log.Println(ds)
+	if math.Abs(ds-53670.85) > 0.01 {
+		t.Log(ds)
 		t.Fail()
 	}
 }

@@ -1,6 +1,7 @@
 package glicko
 
 import (
+	"log"
 	"math"
 )
 
@@ -52,16 +53,18 @@ func NewPlayer(p Parameters) *Player {
 // Win is ...
 func (p *Player) Win(o *Player) *Outcome {
 	var outcome Outcome
+	p.addResult(o, 1)
 	return &outcome
 }
 
-func (p *Player) addWin(o *Player) {
+func (p *Player) addResult(o *Player, score float64) {
 	var r Result
 	r.RD = o.RD
 	r.Rating = o.Rating
-	r.Score = 1
+	r.Score = score
 	r.GRD = o.gRD()
 	r.E = p.e(o)
+	p.History = append(p.History, r)
 }
 
 func (p *Player) e(o *Player) float64 {
@@ -72,13 +75,18 @@ func ratingDelta(r1, r2 float64) float64 {
 	return r1 - r2
 }
 
-// func (p *Player) dsquared() float64 {
-// 	math.Pow(q, 2)
-// }
+func (p *Player) dsquared() float64 {
+	ti := 0.0
+
+	for _, r := range p.History {
+		ti += impact(r.GRD, r.E)
+	}
+	log.Println(ti)
+	return math.Pow(math.Pow(q, 2)*ti, -1)
+}
 
 func impact(grd, e float64) float64 {
-
-	return grd
+	return math.Pow(grd, 2) * e * (1 - e)
 
 }
 
