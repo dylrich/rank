@@ -80,7 +80,7 @@ func (p *Player) dsquared() float64 {
 	for _, r := range p.History {
 		ti += impact(r.GRD, r.E)
 	}
-	return math.Pow(math.Pow(q, 2)*ti, -1)
+	return math.Sqrt(math.Pow(math.Pow(q, 2)*ti, -1))
 }
 
 func impact(grd, e float64) float64 {

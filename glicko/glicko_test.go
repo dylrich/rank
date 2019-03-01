@@ -65,7 +65,7 @@ func TestDSquared(t *testing.T) {
 	p1.addResult(p3, 0)
 	p1.addResult(p4, 0)
 	ds := p1.dsquared()
-	if math.Abs(ds-53685.74) > 0.01 {
+	if math.Abs(ds-231.70) > 0.01 {
 		t.Log(ds)
 		t.Fail()
 	}
