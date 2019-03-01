@@ -1,7 +1,6 @@
 package glicko
 
 import (
-	"log"
 	"math"
 	"testing"
 )
@@ -49,12 +48,12 @@ func TestE(t *testing.T) {
 		t.Log(e)
 		t.Fail()
 	}
-	e = p1.e(p2)
+	e = p1.e(p3)
 	if math.Abs(e-0.432) > .001 {
 		t.Log(e)
 		t.Fail()
 	}
-	e = p1.e(p2)
+	e = p1.e(p4)
 	if math.Abs(e-0.303) > .001 {
 		t.Log(e)
 		t.Fail()
@@ -66,9 +65,7 @@ func TestDSquared(t *testing.T) {
 	p1.addResult(p3, 0)
 	p1.addResult(p4, 0)
 	ds := p1.dsquared()
-
-	log.Println(ds)
-	if math.Abs(ds-53670.85) > 0.01 {
+	if math.Abs(ds-53685.74) > 0.01 {
 		t.Log(ds)
 		t.Fail()
 	}

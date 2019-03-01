@@ -1,7 +1,6 @@
 package glicko
 
 import (
-	"log"
 	"math"
 )
 
@@ -81,7 +80,6 @@ func (p *Player) dsquared() float64 {
 	for _, r := range p.History {
 		ti += impact(r.GRD, r.E)
 	}
-	log.Println(ti)
 	return math.Pow(math.Pow(q, 2)*ti, -1)
 }
 
