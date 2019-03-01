@@ -37,7 +37,7 @@ type Parameters struct {
 
 // Outcome is ...
 type Outcome struct {
-	Rating, Delta float64
+	Rating, RatingDelta, RD, RDDelta float64
 }
 
 // NewPlayer is ...
@@ -51,9 +51,19 @@ func NewPlayer(p Parameters) *Player {
 
 // Win is ...
 func (p *Player) Win(o *Player) *Outcome {
-	var outcome Outcome
 	p.addResult(o, 1)
-	return &outcome
+	ratingPrime := p.ratingPrime()
+	rdPrime := p.rdPrime()
+	ratingDelta := ratingPrime - p.Rating
+	rdDelta := rdPrime - p.RD
+	p.Rating = ratingPrime
+	p.RD = rdPrime
+	return &Outcome{
+		Rating:      p.Rating,
+		RatingDelta: ratingDelta,
+		RD:          rdPrime,
+		RDDelta:     rdDelta,
+	}
 }
 
 func (p *Player) addResult(o *Player, score float64) {
@@ -76,16 +86,14 @@ func ratingDelta(r1, r2 float64) float64 {
 
 func (p *Player) dsquared() float64 {
 	ti := 0.0
-
 	for _, r := range p.History {
 		ti += impact(r.GRD, r.E)
 	}
-	return math.Sqrt(math.Pow(math.Pow(q, 2)*ti, -1))
+	return math.Pow(math.Pow(q, 2)*ti, -1)
 }
 
 func impact(grd, e float64) float64 {
 	return math.Pow(grd, 2) * e * (1 - e)
-
 }
 
 func (p *Player) gRD() float64 {
@@ -94,4 +102,24 @@ func (p *Player) gRD() float64 {
 
 func (p *Player) ratingsDeviation() float64 {
 	return math.Min(math.Sqrt(math.Pow(p.RD, 2)+math.Pow(p.Parameters.C, 2)), p.Parameters.InitialRD)
+}
+
+func (p *Player) ratingPrime() float64 {
+	adjustment := 0.0
+	for _, r := range p.History {
+		adjustment += adjust(r.GRD, r.E, r.Score)
+	}
+	return p.Rating + (q/p.deviationAdjustment())*adjustment
+}
+
+func (p *Player) rdPrime() float64 {
+	return math.Sqrt(math.Pow(p.deviationAdjustment(), -1))
+}
+
+func (p *Player) deviationAdjustment() float64 {
+	return (1 / math.Pow(p.RD, 2)) + (1 / p.dsquared())
+}
+
+func adjust(grd, e, score float64) float64 {
+	return grd * (score - e)
 }

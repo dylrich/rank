@@ -1,2 +1,3 @@
-# rank
-so you can see who is truly the best
+# Rating
+
+A collection of Go packages implementing various rating system measures.

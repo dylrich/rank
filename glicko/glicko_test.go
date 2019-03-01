@@ -22,6 +22,14 @@ var (
 		InitialRD:     300,
 		InitialRating: 1700,
 	})
+	p5 = NewPlayer(Parameters{
+		InitialRD:     200,
+		InitialRating: 1500,
+	})
+	p6 = NewPlayer(Parameters{
+		InitialRD:     200,
+		InitialRating: 1500,
+	})
 )
 
 func TestGRD(t *testing.T) {
@@ -61,12 +69,26 @@ func TestE(t *testing.T) {
 }
 
 func TestDSquared(t *testing.T) {
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
-	ds := p1.dsquared()
-	if math.Abs(ds-231.70) > 0.01 {
+	p5.addResult(p2, 1)
+	p5.addResult(p3, 0)
+	p5.addResult(p4, 0)
+	ds := p5.dsquared()
+	if math.Abs(ds-53685.74) > 0.01 {
 		t.Log(ds)
+		t.Fail()
+	}
+}
+
+func TestWin(t *testing.T) {
+	p6.addResult(p3, 0)
+	p6.addResult(p4, 0)
+	p6.Win(p2)
+	if math.Abs(p6.Rating-1464.1) > 0.1 {
+		t.Log(p6.Rating, p6.RD)
+		t.Fail()
+	}
+	if math.Abs(p6.RD-151.4) > 0.1 {
+		t.Log(p6.Rating, p6.RD)
 		t.Fail()
 	}
 }
