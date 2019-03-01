@@ -66,6 +66,40 @@ func (p *Player) Win(o *Player) *Outcome {
 	}
 }
 
+// Loss is ...
+func (p *Player) Loss(o *Player) *Outcome {
+	p.addResult(o, 0)
+	ratingPrime := p.ratingPrime()
+	rdPrime := p.rdPrime()
+	ratingDelta := ratingPrime - p.Rating
+	rdDelta := rdPrime - p.RD
+	p.Rating = ratingPrime
+	p.RD = rdPrime
+	return &Outcome{
+		Rating:      p.Rating,
+		RatingDelta: ratingDelta,
+		RD:          rdPrime,
+		RDDelta:     rdDelta,
+	}
+}
+
+// Draw is ...
+func (p *Player) Draw(o *Player) *Outcome {
+	p.addResult(o, 0.5)
+	ratingPrime := p.ratingPrime()
+	rdPrime := p.rdPrime()
+	ratingDelta := ratingPrime - p.Rating
+	rdDelta := rdPrime - p.RD
+	p.Rating = ratingPrime
+	p.RD = rdPrime
+	return &Outcome{
+		Rating:      p.Rating,
+		RatingDelta: ratingDelta,
+		RD:          rdPrime,
+		RDDelta:     rdDelta,
+	}
+}
+
 func (p *Player) addResult(o *Player, score float64) {
 	var r Result
 	r.RD = o.RD

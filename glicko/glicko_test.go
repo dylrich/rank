@@ -30,6 +30,14 @@ var (
 		InitialRD:     200,
 		InitialRating: 1500,
 	})
+	p7 = NewPlayer(Parameters{
+		InitialRD:     200,
+		InitialRating: 1500,
+	})
+	p8 = NewPlayer(Parameters{
+		InitialRD:     200,
+		InitialRating: 1500,
+	})
 )
 
 func TestGRD(t *testing.T) {
@@ -89,6 +97,34 @@ func TestWin(t *testing.T) {
 	}
 	if math.Abs(p6.RD-151.4) > 0.1 {
 		t.Log(p6.Rating, p6.RD)
+		t.Fail()
+	}
+}
+
+func TestLoss(t *testing.T) {
+	p7.addResult(p3, 0)
+	p7.addResult(p4, 0)
+	p7.Loss(p2)
+	if math.Abs(p7.Rating-1332.7) > 0.1 {
+		t.Log(p7.Rating, p7.RD)
+		t.Fail()
+	}
+	if math.Abs(p7.RD-151.4) > 0.1 {
+		t.Log(p7.Rating, p7.RD)
+		t.Fail()
+	}
+}
+
+func TestDraw(t *testing.T) {
+	p8.addResult(p3, 0)
+	p8.addResult(p4, 0)
+	p8.Draw(p2)
+	if math.Abs(p8.Rating-1398.4) > 0.1 {
+		t.Log(p8.Rating, p8.RD)
+		t.Fail()
+	}
+	if math.Abs(p8.RD-151.4) > 0.1 {
+		t.Log(p8.Rating, p8.RD)
 		t.Fail()
 	}
 }
