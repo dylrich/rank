@@ -45,3 +45,24 @@ func TestMu(t *testing.T) {
 	}
 
 }
+
+func TestPhi(t *testing.T) {
+
+	phi := calcPhi(p2.Deviation)
+	if math.Abs(phi-.1727) > .0001 {
+		t.Log(phi)
+		t.Fail()
+	}
+
+	phi = calcPhi(p3.Deviation)
+	if math.Abs(phi-.5756) > .0001 {
+		t.Log(phi)
+		t.Fail()
+	}
+
+	phi = calcPhi(p4.Deviation)
+	if math.Abs(phi-1.7269) > .0001 {
+		t.Log(phi)
+		t.Fail()
+	}
+}
