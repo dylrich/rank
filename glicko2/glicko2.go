@@ -106,9 +106,18 @@ func impact(g, e float64) float64 {
 	return math.Pow(g, 2) * e * (1 - e)
 }
 
-// func (p *Player) delta() float64 {
+func (p *Player) delta(v float64) float64 {
+	td := 0.0
+	for _, result := range p.History {
+		td += score(result.G, result.Score, result.E)
+	}
 
-// }
+	return v * td
+}
+
+func score(g, s, e float64) float64 {
+	return g * (s - e)
+}
 
 // func (p *Player) volatilityPrime() float64 {
 

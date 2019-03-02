@@ -120,4 +120,19 @@ func TestVariation(t *testing.T) {
 		t.Log(v)
 		t.Fail()
 	}
+	p1.Reset()
+}
+
+func TestDelta(t *testing.T) {
+	p1.addResult(p2, 1)
+	p1.addResult(p3, 0)
+	p1.addResult(p4, 0)
+
+	d := p1.delta(p1.variation())
+
+	if math.Abs(d - -.4834) > .001 {
+		t.Log(d)
+		t.Fail()
+	}
+	p1.Reset()
 }
