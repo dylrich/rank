@@ -98,6 +98,9 @@ func (p *Player) addResult(o *Player, score float64) {
 func (p *Player) Win(o *Player) Outcome {
 	p.addResult(o, 1)
 	outcome := p.getOutcome()
+	p.Deviation = outcome.Deviation
+	p.Rating = outcome.Rating
+	p.Volatility = outcome.Volatility
 	return outcome
 }
 
@@ -106,8 +109,8 @@ func (p *Player) getOutcome() Outcome {
 	phi := toPhi(p.Deviation)
 	ti := totalImpact(&p.History)
 	variance := variance(ti)
-	// delta := delta(variance, &p.History)
-	volatility := volatility(p.Volatility, variance, phi, &p.History)
+	delta := delta(variance, &p.History)
+	volatility := volatility(p.Volatility, variance, phi, delta)
 	pp := phiPrime(rd(phi, volatility), variance)
 	deviation := fromPhi(pp)
 	rating := fromMu(muPrime(mu, pp, ti))
@@ -166,30 +169,51 @@ func resultScore(g, s, e float64) float64 {
 	return g * (s - e)
 }
 
-func volatility(sigma, variance, phi float64, history *[]Result) float64 {
-	var b float64
-	var a float64
-	a, b = initializeComparison(sigma, variance, phi, history)
-	for math.Abs(b-a) > ConverganceTolerance {
-
+func volatility(sigma, variance, phi, delta float64) float64 {
+	var A, B, C, fa, fb, fc float64
+	a := toAlpha(sigma)
+	A, B = initializeComparison(sigma, variance, phi, delta, a)
+	fa = illinois(A, phi, variance, a, delta)
+	fb = illinois(B, phi, variance, a, delta)
+	for math.Abs(B-A) > ConverganceTolerance {
+		C = A + (A-B)*fa/(fb-fa)
+		fc = illinois(C, phi, variance, a, delta)
+		if 0 > (fc * fb) {
+			A = B
+			fa = fb
+		} else {
+			fa = fa / 2
+		}
+		B = C
+		fb = fc
 	}
-	return math.Pow(math.E, (a / 2))
+	return math.Pow(math.E, (A / 2))
 }
 
-func initializeComparison(sigma, variance, phi float64, history *[]Result) (float64, float64) {
-	var b float64
-	var a float64
-	a = alpha(sigma)
-	deltaSquared := math.Pow(delta(variance, history), 2)
+func initializeComparison(sigma, variance, phi, delta, a float64) (float64, float64) {
+	var A, B float64
+	A = a
+	deltaSquared := math.Pow(delta, 2)
 	if deltaSquared > math.Pow(phi, 2)+variance {
-		b = math.Log(deltaSquared - math.Pow(phi, 2) - variance)
+		B = math.Log(deltaSquared - math.Pow(phi, 2) - variance)
+		return A, B
 	}
-
-	return a, b
-
+	k := 1.0
+	for 0 > illinois(a-k*SystemConstant, phi, variance, a, delta) {
+		k++
+	}
+	return A, B
 }
 
-func alpha(sigma float64) float64 {
+func illinois(x, phi, variance, alpha, delta float64) float64 {
+	ex := math.Pow(math.E, x)
+	phiSquared := math.Pow(phi, 2)
+	left := ex * (math.Pow(delta, 2) - phiSquared - variance - ex) / (2 * math.Pow(phiSquared+variance+ex, 2))
+	right := (x - alpha) / math.Pow(SystemConstant, 2)
+	return left - right
+}
+
+func toAlpha(sigma float64) float64 {
 	return math.Log(math.Pow(sigma, 2))
 }
 
