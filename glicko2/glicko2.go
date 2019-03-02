@@ -62,7 +62,7 @@ func calcPhi(deviation float64) float64 {
 }
 
 func calcMu(rating float64) float64 {
-	return rating / 173.7178
+	return (rating - 1500) / 173.7178
 }
 
 // func (p *Player) variation() float64 {
