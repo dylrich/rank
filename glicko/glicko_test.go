@@ -40,20 +40,20 @@ var (
 	})
 )
 
-func TestGDeviation(t *testing.T) {
-	gDeviation := p2.gDeviation()
-	if math.Abs(gDeviation-0.9955) > .0001 {
-		t.Log(gDeviation)
+func TestG(t *testing.T) {
+	g := p2.g()
+	if math.Abs(g-0.9955) > .0001 {
+		t.Log(g)
 		t.Fail()
 	}
-	gDeviation = p3.gDeviation()
-	if math.Abs(gDeviation-0.9531) > .0001 {
-		t.Log(gDeviation)
+	g = p3.g()
+	if math.Abs(g-0.9531) > .0001 {
+		t.Log(g)
 		t.Fail()
 	}
-	gDeviation = p4.gDeviation()
-	if math.Abs(gDeviation-0.7242) > .0001 {
-		t.Log(gDeviation)
+	g = p4.g()
+	if math.Abs(g-0.7242) > .0001 {
+		t.Log(g)
 		t.Fail()
 	}
 }

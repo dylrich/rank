@@ -19,7 +19,7 @@ var (
 
 // Result is ...
 type Result struct {
-	Rating, Deviation, GDeviation, E, Score float64
+	Rating, Deviation, G, E, Score float64
 }
 
 // Player is ...
@@ -43,8 +43,8 @@ type Outcome struct {
 // NewPlayer is ...
 func NewPlayer(p Parameters) *Player {
 	if &p.InitialDeviation == nil || &p.InitialRating == nil {
-		p.InitialDeviation = 350
-		p.InitialRating = 1500
+		p.InitialDeviation = DefaultInitialDeviation
+		p.InitialRating = DefaultInitialRating
 	}
 	return &Player{Rating: p.InitialRating, Deviation: p.InitialDeviation, Parameters: p}
 }
@@ -105,13 +105,13 @@ func (p *Player) addResult(o *Player, score float64) {
 	r.Deviation = o.Deviation
 	r.Rating = o.Rating
 	r.Score = score
-	r.GDeviation = o.gDeviation()
+	r.G = o.g()
 	r.E = p.e(o)
 	p.History = append(p.History, r)
 }
 
 func (p *Player) e(o *Player) float64 {
-	return 1 / (1 + math.Pow(10, (-o.gDeviation()*ratingDelta(p.Rating, o.Rating)/400)))
+	return 1 / (1 + math.Pow(10, (-o.g()*ratingDelta(p.Rating, o.Rating)/400)))
 }
 
 func ratingDelta(r1, r2 float64) float64 {
@@ -121,16 +121,16 @@ func ratingDelta(r1, r2 float64) float64 {
 func (p *Player) dsquared() float64 {
 	ti := 0.0
 	for _, r := range p.History {
-		ti += impact(r.GDeviation, r.E)
+		ti += impact(r.G, r.E)
 	}
 	return math.Pow(math.Pow(q, 2)*ti, -1)
 }
 
-func impact(gDeviation, e float64) float64 {
-	return math.Pow(gDeviation, 2) * e * (1 - e)
+func impact(g, e float64) float64 {
+	return math.Pow(g, 2) * e * (1 - e)
 }
 
-func (p *Player) gDeviation() float64 {
+func (p *Player) g() float64 {
 	return 1 / math.Sqrt(1+(3*math.Pow(q, 2)*math.Pow(p.Deviation, 2)/math.Pow(math.Pi, 2)))
 }
 
@@ -141,7 +141,7 @@ func (p *Player) ratingsDeviation() float64 {
 func (p *Player) ratingPrime() float64 {
 	adjustment := 0.0
 	for _, r := range p.History {
-		adjustment += adjust(r.GDeviation, r.E, r.Score)
+		adjustment += adjust(r.G, r.E, r.Score)
 	}
 	return p.Rating + (q/p.deviationAdjustment())*adjustment
 }
@@ -154,6 +154,6 @@ func (p *Player) deviationAdjustment() float64 {
 	return (1 / math.Pow(p.Deviation, 2)) + (1 / p.dsquared())
 }
 
-func adjust(gDeviation, e, score float64) float64 {
-	return gDeviation * (score - e)
+func adjust(g, e, score float64) float64 {
+	return g * (score - e)
 }
