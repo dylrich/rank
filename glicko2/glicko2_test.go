@@ -26,19 +26,19 @@ var (
 
 func TestMu(t *testing.T) {
 
-	mu := calcMu(p2.Rating)
+	mu := toMu(p2.Rating)
 	if math.Abs(mu - -0.5756) > .0001 {
 		t.Log(mu)
 		t.Fail()
 	}
 
-	mu = calcMu(p3.Rating)
+	mu = toMu(p3.Rating)
 	if math.Abs(mu-.2878) > .0001 {
 		t.Log(mu)
 		t.Fail()
 	}
 
-	mu = calcMu(p4.Rating)
+	mu = toMu(p4.Rating)
 	if math.Abs(mu-1.1513) > .0001 {
 		t.Log(mu)
 		t.Fail()
@@ -48,19 +48,19 @@ func TestMu(t *testing.T) {
 
 func TestPhi(t *testing.T) {
 
-	phi := calcPhi(p2.Deviation)
+	phi := toPhi(p2.Deviation)
 	if math.Abs(phi-.1727) > .0001 {
 		t.Log(phi)
 		t.Fail()
 	}
 
-	phi = calcPhi(p3.Deviation)
+	phi = toPhi(p3.Deviation)
 	if math.Abs(phi-.5756) > .0001 {
 		t.Log(phi)
 		t.Fail()
 	}
 
-	phi = calcPhi(p4.Deviation)
+	phi = toPhi(p4.Deviation)
 	if math.Abs(phi-1.7269) > .0001 {
 		t.Log(phi)
 		t.Fail()
@@ -109,12 +109,12 @@ func TestE(t *testing.T) {
 	}
 }
 
-func TestVariation(t *testing.T) {
+func TestVariance(t *testing.T) {
 	p1.addResult(p2, 1)
 	p1.addResult(p3, 0)
 	p1.addResult(p4, 0)
 
-	v := p1.variation()
+	v := variance(totalImpact(&p1.History))
 
 	if math.Abs(v-1.7785) > .001 {
 		t.Log(v)
@@ -128,7 +128,8 @@ func TestDelta(t *testing.T) {
 	p1.addResult(p3, 0)
 	p1.addResult(p4, 0)
 
-	d := p1.delta(p1.variation())
+	v := variance(totalImpact(&p1.History))
+	d := delta(v, &p1.History)
 
 	if math.Abs(d - -.4834) > .001 {
 		t.Log(d)

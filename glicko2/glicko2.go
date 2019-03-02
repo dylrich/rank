@@ -14,6 +14,12 @@ const (
 
 	// DefaultInitialVolatility is ...
 	DefaultInitialVolatility = 0.06
+
+	// ConverganceTolerance is ...
+	ConverganceTolerance = 0.000001
+
+	// SystemConstant is ...
+	SystemConstant = 0.6
 )
 
 var (
@@ -54,34 +60,28 @@ func NewPlayer(p Parameters) *Player {
 		p.InitialVolatility = DefaultInitialVolatility
 	}
 
-	return &Player{Rating: p.InitialRating, Deviation: p.InitialDeviation, Parameters: p, mu: calcMu(p.InitialRating), phi: calcPhi(p.InitialDeviation)}
+	return &Player{Rating: p.InitialRating, Deviation: p.InitialDeviation, Parameters: p}
 }
 
-func calcPhi(deviation float64) float64 {
+func toPhi(deviation float64) float64 {
 	return deviation / 173.7178
 }
 
-func calcMu(rating float64) float64 {
+func toMu(rating float64) float64 {
 	return (rating - 1500) / 173.7178
 }
 
-func (p *Player) variation() float64 {
-	tv := 0.0
-
-	for _, result := range p.History {
-		tv += impact(result.G, result.E)
-	}
-
-	return math.Pow(tv, -1)
+func variance(ti float64) float64 {
+	return math.Pow(ti, -1)
 
 }
 
 func (p *Player) g() float64 {
-	return 1 / math.Sqrt(1+(3*math.Pow(p.phi, 2)/math.Pow(math.Pi, 2)))
+	return 1 / math.Sqrt(1+(3*math.Pow(toPhi(p.Deviation), 2)/math.Pow(math.Pi, 2)))
 }
 
 func (p *Player) e(o *Player) float64 {
-	return 1 / (1 + math.Pow(math.E, -o.g()*(p.mu-o.mu)))
+	return 1 / (1 + math.Pow(math.E, -o.g()*(toMu(p.Rating)-toMu(o.Rating))))
 }
 
 func (p *Player) addResult(o *Player, score float64) {
@@ -92,6 +92,53 @@ func (p *Player) addResult(o *Player, score float64) {
 	r.G = o.g()
 	r.E = p.e(o)
 	p.History = append(p.History, r)
+}
+
+// Win is ...
+func (p *Player) Win(o *Player) Outcome {
+	p.addResult(o, 1)
+	outcome := p.getOutcome()
+	return outcome
+}
+
+func (p *Player) getOutcome() Outcome {
+	mu := toMu(p.Rating)
+	phi := toPhi(p.Deviation)
+	ti := totalImpact(&p.History)
+	variance := variance(ti)
+	// delta := delta(variance, &p.History)
+	volatility := volatility(p.Volatility, variance, phi, &p.History)
+	pp := phiPrime(rd(phi, volatility), variance)
+	deviation := fromPhi(pp)
+	rating := fromMu(muPrime(mu, pp, ti))
+	return Outcome{
+		Rating:          rating,
+		RatingDelta:     rating - p.Rating,
+		Deviation:       deviation,
+		DeviationDelta:  deviation - p.Deviation,
+		Volatility:      volatility,
+		VolatilityDelta: volatility - p.Volatility,
+	}
+}
+
+func totalImpact(history *[]Result) float64 {
+	tv := 0.0
+	for _, result := range *history {
+		tv += impact(result.G, result.E)
+	}
+	return tv
+}
+
+func rd(phi, volatility float64) float64 {
+	return math.Sqrt(math.Pow(phi, 2) + math.Pow(volatility, 2))
+}
+
+func phiPrime(rd, variance float64) float64 {
+	return 1 / math.Sqrt((1/math.Pow(rd, 2) + (1 / variance)))
+}
+
+func muPrime(mu, phi, ti float64) float64 {
+	return mu + math.Pow(phi, 2)*ti
 }
 
 // Reset is ...
@@ -106,35 +153,50 @@ func impact(g, e float64) float64 {
 	return math.Pow(g, 2) * e * (1 - e)
 }
 
-func (p *Player) delta(v float64) float64 {
+func delta(variance float64, history *[]Result) float64 {
 	td := 0.0
-	for _, result := range p.History {
-		td += score(result.G, result.Score, result.E)
+	for _, result := range *history {
+		td += resultScore(result.G, result.Score, result.E)
 	}
 
-	return v * td
+	return variance * td
 }
 
-func score(g, s, e float64) float64 {
+func resultScore(g, s, e float64) float64 {
 	return g * (s - e)
 }
 
-// func (p *Player) volatilityPrime() float64 {
+func volatility(sigma, variance, phi float64, history *[]Result) float64 {
+	var b float64
+	var a float64
+	a, b = initializeComparison(sigma, variance, phi, history)
+	for math.Abs(b-a) > ConverganceTolerance {
 
-// }
-
-// func (p *Player) phiPrime() float64 {
-
-// }
-
-// func (p *Player) muPrime() float64 {
-
-// }
-
-func (p *Player) convertRating() float64 {
-	return (173.7178 * p.mu) + 1500
+	}
+	return math.Pow(math.E, (a / 2))
 }
 
-func (p *Player) convertDeviation() float64 {
-	return 173.7178 * p.phi
+func initializeComparison(sigma, variance, phi float64, history *[]Result) (float64, float64) {
+	var b float64
+	var a float64
+	a = alpha(sigma)
+	deltaSquared := math.Pow(delta(variance, history), 2)
+	if deltaSquared > math.Pow(phi, 2)+variance {
+		b = math.Log(deltaSquared - math.Pow(phi, 2) - variance)
+	}
+
+	return a, b
+
+}
+
+func alpha(sigma float64) float64 {
+	return math.Log(math.Pow(sigma, 2))
+}
+
+func fromMu(mu float64) float64 {
+	return (173.7178 * mu) + 1500
+}
+
+func fromPhi(phi float64) float64 {
+	return 173.7178 * phi
 }

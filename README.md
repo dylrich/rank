@@ -6,6 +6,10 @@ A collection of Go packages implementing various rating system measures.
 
 Elo and Glicko are probably fine to use, but the code will undergo many improvements in the future, including more and better tests as well as better internal structuring. Glicko2 is not yet implemented.
 
+## A note on concurrency
+
+This library will not protect against race conditions and assumes that player data is only accessed one at a time. If you need to support concurrent writes to player data (e.g. two different results occurred at the same time), you will need to implement a mutex in your own application.
+
 ## System descriptions
 
 ### Elo
