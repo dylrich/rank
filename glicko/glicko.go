@@ -146,6 +146,13 @@ func (p *Player) ratingPrime() float64 {
 	return p.Rating + (q/p.deviationAdjustment())*adjustment
 }
 
+// Reset is ...
+func (p *Player) Reset() {
+	p.History = []Result{}
+	p.Deviation = p.Parameters.InitialDeviation
+	p.Rating = p.Parameters.InitialRating
+}
+
 func (p *Player) deviationPrime() float64 {
 	return math.Sqrt(math.Pow(p.deviationAdjustment(), -1))
 }

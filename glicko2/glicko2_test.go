@@ -108,3 +108,16 @@ func TestE(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestVariation(t *testing.T) {
+	p1.addResult(p2, 1)
+	p1.addResult(p3, 0)
+	p1.addResult(p4, 0)
+
+	v := p1.variation()
+
+	if math.Abs(v-1.7785) > .001 {
+		t.Log(v)
+		t.Fail()
+	}
+}

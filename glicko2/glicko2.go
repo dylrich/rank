@@ -65,8 +65,16 @@ func calcMu(rating float64) float64 {
 	return (rating - 1500) / 173.7178
 }
 
-// func (p *Player) variation() float64 {
-// }
+func (p *Player) variation() float64 {
+	tv := 0.0
+
+	for _, result := range p.History {
+		tv += impact(result.G, result.E)
+	}
+
+	return math.Pow(tv, -1)
+
+}
 
 func (p *Player) g() float64 {
 	return 1 / math.Sqrt(1+(3*math.Pow(p.phi, 2)/math.Pow(math.Pi, 2)))
@@ -84,6 +92,18 @@ func (p *Player) addResult(o *Player, score float64) {
 	r.G = o.g()
 	r.E = p.e(o)
 	p.History = append(p.History, r)
+}
+
+// Reset is ...
+func (p *Player) Reset() {
+	p.History = []Result{}
+	p.Deviation = p.Parameters.InitialDeviation
+	p.Rating = p.Parameters.InitialRating
+	p.Volatility = p.Parameters.InitialVolatility
+}
+
+func impact(g, e float64) float64 {
+	return math.Pow(g, 2) * e * (1 - e)
 }
 
 // func (p *Player) delta() float64 {
