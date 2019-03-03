@@ -25,21 +25,21 @@ var (
 	})
 )
 
-func TestMu(t *testing.T) {
+func TestToMu(t *testing.T) {
 
-	mu := toMu(p2.Rating)
+	mu := toMu(1400)
 	if math.Abs(mu - -0.5756) > .0001 {
 		t.Log(mu)
 		t.Fail()
 	}
 
-	mu = toMu(p3.Rating)
+	mu = toMu(1550)
 	if math.Abs(mu-.2878) > .0001 {
 		t.Log(mu)
 		t.Fail()
 	}
 
-	mu = toMu(p4.Rating)
+	mu = toMu(1700)
 	if math.Abs(mu-1.1513) > .0001 {
 		t.Log(mu)
 		t.Fail()
@@ -47,63 +47,63 @@ func TestMu(t *testing.T) {
 
 }
 
-func TestPhi(t *testing.T) {
+func TestToPhi(t *testing.T) {
 
-	phi := toPhi(p2.Deviation)
+	phi := toPhi(30)
 	if math.Abs(phi-.1727) > .0001 {
 		t.Log(phi)
 		t.Fail()
 	}
 
-	phi = toPhi(p3.Deviation)
+	phi = toPhi(100)
 	if math.Abs(phi-.5756) > .0001 {
 		t.Log(phi)
 		t.Fail()
 	}
 
-	phi = toPhi(p4.Deviation)
+	phi = toPhi(300)
 	if math.Abs(phi-1.7269) > .0001 {
 		t.Log(phi)
 		t.Fail()
 	}
 }
 
-func TestG(t *testing.T) {
+func TestToG(t *testing.T) {
 
-	g := p2.g()
+	g := toG(30.0)
 	if math.Abs(g-.9955) > .0001 {
 		t.Log(g)
 		t.Fail()
 	}
 
-	g = p3.g()
+	g = toG(100.0)
 	if math.Abs(g-.9531) > .0001 {
 		t.Log(g)
 		t.Fail()
 	}
 
-	g = p4.g()
+	g = toG(300.0)
 	if math.Abs(g-.7242) > .0001 {
 		t.Log(g)
 		t.Fail()
 	}
 }
 
-func TestE(t *testing.T) {
+func TestToE(t *testing.T) {
 
-	e := p1.e(p2)
+	e := toE(1500, 1400, .9955)
 	if math.Abs(e-.639) > .001 {
 		t.Log(e)
 		t.Fail()
 	}
 
-	e = p1.e(p3)
+	e = toE(1500, 1550, .9531)
 	if math.Abs(e-.432) > .001 {
 		t.Log(e)
 		t.Fail()
 	}
 
-	e = p1.e(p4)
+	e = toE(1500, 1700, .7242)
 	if math.Abs(e-.303) > .001 {
 		t.Log(e)
 		t.Fail()
@@ -111,21 +111,69 @@ func TestE(t *testing.T) {
 }
 
 func TestVariance(t *testing.T) {
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
-
-	v := variance(totalImpact(&p1.History))
-
-	if math.Abs(v-1.7789) > .0001 {
+	totalImpact := 0.5621
+	v := variance(totalImpact)
+	if math.Abs(v-1.7790) > .0001 {
 		t.Log(v)
 		t.Fail()
 	}
+}
+
+func TestImpact(t *testing.T) {
+	var i, g, e float64
+
+	g = 0.9955
+	e = 0.639
+	i = impact(g, e)
+	if math.Abs(i-0.228607) > .000001 {
+		t.Log(i)
+		t.Fail()
+	}
+
+	g = 0.9531
+	e = 0.432
+	i = impact(g, e)
+	if math.Abs(i-0.222899) > .000001 {
+		t.Log(i)
+		t.Fail()
+	}
+
+	g = 0.7242
+	e = 0.303
+	i = impact(g, e)
+	if math.Abs(i-0.110762) > .000001 {
+		t.Log(i)
+		t.Fail()
+	}
+}
+
+func TestTotalImpact(t *testing.T) {
 	p1.Reset()
+	p1.addResult(p2, 1)
+	p1.addResult(p3, 0)
+	p1.addResult(p4, 0)
+	ti := totalImpact(&p1.History)
+
+	if math.Abs(ti-0.5621) > .0001 {
+		t.Log(ti)
+		t.Fail()
+	}
+}
+
+func TestTotalResultScore(t *testing.T) {
+	p1.Reset()
+	p1.addResult(p2, 1)
+	p1.addResult(p3, 0)
+	p1.addResult(p4, 0)
+	rs := totalResultScore(&p1.History)
+	if math.Abs(rs - -0.2720) > .0001 {
+		t.Log(rs)
+		t.Fail()
+	}
 }
 
 func TestAlpha(t *testing.T) {
-	a := toAlpha(p1.Volatility)
+	a := toAlpha(0.06)
 	if math.Abs(a - -5.62682) > .00001 {
 		t.Log(a)
 		t.Fail()
@@ -133,28 +181,23 @@ func TestAlpha(t *testing.T) {
 }
 
 func TestDelta(t *testing.T) {
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
-
-	v := variance(totalImpact(&p1.History))
-	d := delta(v, &p1.History)
-
-	if math.Abs(d - -.4839) > .0001 {
+	variance := 1.7785
+	rs := -0.2720
+	d := delta(variance, rs)
+	if math.Abs(d - -.4837) > .0001 {
 		t.Log(d)
 		t.Fail()
 	}
-	p1.Reset()
 }
 
 func TestIllinois(t *testing.T) {
+	SystemConstant = 0.5
 	phi := 1.1513
 	variance := 1.7785
 	delta := -0.4834
 	a := -5.62682
 	A := -5.62682
 	B := -6.12682
-	SystemConstant = 0.5
 	ia := illinois(A, phi, variance, a, delta)
 	if math.Abs(ia - -0.00053567) > .00000001 {
 		t.Log(ia)
@@ -170,12 +213,12 @@ func TestIllinois(t *testing.T) {
 }
 
 func TestInitialize(t *testing.T) {
+	SystemConstant = 0.5
 	sigma := 0.06
 	phi := 1.1513
 	variance := 1.7785
 	delta := -0.4834
 	a := -5.62682
-	SystemConstant = 0.5
 	A, B := initializeComparison(sigma, variance, phi, delta, a)
 	if math.Abs(A - -5.62682) > .00001 {
 		t.Log(A)
@@ -186,11 +229,47 @@ func TestInitialize(t *testing.T) {
 		t.Log(B)
 		t.Fail()
 	}
-	p1.Reset()
 	SystemConstant = 0.6
 }
 
+func TestVolatility(t *testing.T) {
+	SystemConstant = 0.5
+	sigma := 0.06
+	phi := 1.1513
+	variance := 1.7785
+	delta := -0.4834
+	v := volatility(sigma, variance, phi, delta)
+	if math.Abs(v-0.05999) > .00001 {
+		t.Log(v)
+		t.Fail()
+	}
+	SystemConstant = 0.6
+}
+
+func TestPhiPrime(t *testing.T) {
+	phi := 1.1513
+	variance := 1.7785
+	volatility := 0.05999
+	pp := phiPrime(rd(phi, volatility), variance)
+	if math.Abs(pp-0.8722) > .0001 {
+		t.Log(pp)
+		t.Fail()
+	}
+}
+
+func TestMuPrime(t *testing.T) {
+	ti := -0.272
+	mu := 0.0
+	pp := 0.8722
+	mp := muPrime(mu, pp, ti)
+	if math.Abs(mp - -0.2069) > .0001 {
+		t.Log(mp)
+		t.Fail()
+	}
+}
+
 func TestGlicko2(t *testing.T) {
+	SystemConstant = 0.5
 	p1.addResult(p3, 0)
 	p1.addResult(p4, 0)
 	o := p1.Win(p2)
@@ -209,4 +288,5 @@ func TestGlicko2(t *testing.T) {
 		t.Fail()
 	}
 	p1.Reset()
+	SystemConstant = 0.6
 }

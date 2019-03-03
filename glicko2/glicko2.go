@@ -75,12 +75,12 @@ func variance(ti float64) float64 {
 
 }
 
-func (p *Player) g() float64 {
-	return 1 / math.Sqrt(1+(3*math.Pow(toPhi(p.Deviation), 2)/math.Pow(math.Pi, 2)))
+func toG(deviation float64) float64 {
+	return 1 / math.Sqrt(1+(3*math.Pow(toPhi(deviation), 2)/math.Pow(math.Pi, 2)))
 }
 
-func (p *Player) e(o *Player) float64 {
-	return 1 / (1 + math.Pow(math.E, -o.g()*(toMu(p.Rating)-toMu(o.Rating))))
+func toE(playerRating, opponentRating, opponentG float64) float64 {
+	return 1 / (1 + math.Pow(math.E, -opponentG*(toMu(playerRating)-toMu(opponentRating))))
 }
 
 func (p *Player) addResult(o *Player, score float64) {
@@ -88,8 +88,9 @@ func (p *Player) addResult(o *Player, score float64) {
 	r.Deviation = o.Deviation
 	r.Rating = o.Rating
 	r.Score = score
-	r.G = o.g()
-	r.E = p.e(o)
+	g := toG(o.Deviation)
+	r.G = g
+	r.E = toE(p.Rating, o.Rating, g)
 	p.History = append(p.History, r)
 }
 
@@ -108,7 +109,8 @@ func (p *Player) getOutcome() Outcome {
 	phi := toPhi(p.Deviation)
 	ti := totalImpact(&p.History)
 	variance := variance(ti)
-	delta := delta(variance, &p.History)
+	ts := totalResultScore(&p.History)
+	delta := delta(variance, ts)
 	volatility := volatility(p.Volatility, variance, phi, delta)
 	pp := phiPrime(rd(phi, volatility), variance)
 	deviation := fromPhi(pp)
@@ -155,13 +157,16 @@ func impact(g, e float64) float64 {
 	return math.Pow(g, 2) * e * (1 - e)
 }
 
-func delta(variance float64, history *[]Result) float64 {
-	td := 0.0
-	for _, result := range *history {
-		td += resultScore(result.G, result.Score, result.E)
-	}
+func delta(variance, resultScore float64) float64 {
+	return variance * resultScore
+}
 
-	return variance * td
+func totalResultScore(history *[]Result) float64 {
+	ts := 0.0
+	for _, result := range *history {
+		ts += resultScore(result.G, result.Score, result.E)
+	}
+	return ts
 }
 
 func resultScore(g, s, e float64) float64 {
