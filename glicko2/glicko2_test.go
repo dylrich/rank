@@ -268,25 +268,43 @@ func TestMuPrime(t *testing.T) {
 	}
 }
 
+func TestFromMu(t *testing.T) {
+	mu := -0.2069
+	rating := fromMu(mu)
+	if math.Abs(rating-1464.06) > .01 {
+		t.Log(rating)
+		t.Fail()
+	}
+}
+
+func TestFromPhi(t *testing.T) {
+	phi := 0.8722
+	deviation := fromPhi(phi)
+	if math.Abs(deviation-151.5) > .1 {
+		t.Log(deviation)
+		t.Fail()
+	}
+}
+
 func TestGlicko2(t *testing.T) {
-	SystemConstant = 0.5
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
-	o := p1.Win(p2)
-	if math.Abs(o.Rating-1464.06) > .01 {
-		t.Log(o)
-		t.Fail()
-	}
-
-	if math.Abs(o.Volatility-.05999) > .00001 {
-		t.Log(o)
-		t.Fail()
-	}
-
-	if math.Abs(o.Deviation-151.52) > .01 {
-		t.Log(o.Deviation)
-		t.Fail()
-	}
 	p1.Reset()
+	SystemConstant = 0.5
+	p1.Win(p2)
+	p1.Lose(p3)
+	outcome := p1.Lose(p4)
+	if math.Abs(outcome.Rating-1464.06) > .01 {
+		t.Log(outcome)
+		t.Fail()
+	}
+
+	if math.Abs(outcome.Volatility-.05999) > .00001 {
+		t.Log(outcome)
+		t.Fail()
+	}
+
+	if math.Abs(outcome.Deviation-151.52) > .01 {
+		t.Log(outcome.Deviation)
+		t.Fail()
+	}
 	SystemConstant = 0.6
 }

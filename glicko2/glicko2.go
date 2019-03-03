@@ -88,9 +88,9 @@ func (p *Player) addResult(o *Player, score float64) {
 	r.Deviation = o.Deviation
 	r.Rating = o.Rating
 	r.Score = score
-	g := toG(o.Deviation)
+	g := toG(o.Parameters.InitialDeviation)
 	r.G = g
-	r.E = toE(p.Rating, o.Rating, g)
+	r.E = toE(p.Parameters.InitialRating, o.Parameters.InitialRating, g)
 	p.History = append(p.History, r)
 }
 
@@ -104,17 +104,37 @@ func (p *Player) Win(o *Player) Outcome {
 	return outcome
 }
 
+// Lose is ...
+func (p *Player) Lose(o *Player) Outcome {
+	p.addResult(o, 0)
+	outcome := p.getOutcome()
+	p.Deviation = outcome.Deviation
+	p.Rating = outcome.Rating
+	p.Volatility = outcome.Volatility
+	return outcome
+}
+
+// Draw is ...
+func (p *Player) Draw(o *Player) Outcome {
+	p.addResult(o, 0.5)
+	outcome := p.getOutcome()
+	p.Deviation = outcome.Deviation
+	p.Rating = outcome.Rating
+	p.Volatility = outcome.Volatility
+	return outcome
+}
+
 func (p *Player) getOutcome() Outcome {
-	mu := toMu(p.Rating)
-	phi := toPhi(p.Deviation)
+	mu := toMu(p.Parameters.InitialRating)
+	phi := toPhi(p.Parameters.InitialDeviation)
 	ti := totalImpact(&p.History)
-	variance := variance(ti)
 	ts := totalResultScore(&p.History)
+	variance := variance(ti)
 	delta := delta(variance, ts)
-	volatility := volatility(p.Volatility, variance, phi, delta)
+	volatility := volatility(p.Parameters.InitialVolatility, variance, phi, delta)
 	pp := phiPrime(rd(phi, volatility), variance)
 	deviation := fromPhi(pp)
-	rating := fromMu(muPrime(mu, pp, ti))
+	rating := fromMu(muPrime(mu, pp, ts))
 	return Outcome{
 		Rating:          rating,
 		RatingDelta:     rating - p.Rating,
