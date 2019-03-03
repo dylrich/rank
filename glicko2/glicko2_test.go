@@ -148,15 +148,13 @@ func TestDelta(t *testing.T) {
 }
 
 func TestIllinois(t *testing.T) {
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
 	phi := 1.1513
 	variance := 1.7785
 	delta := -0.4834
 	a := -5.62682
 	A := -5.62682
 	B := -6.12682
+	SystemConstant = 0.5
 	ia := illinois(A, phi, variance, a, delta)
 	if math.Abs(ia - -0.00053567) > .00000001 {
 		t.Log(ia)
@@ -168,19 +166,17 @@ func TestIllinois(t *testing.T) {
 		t.Log(ib)
 		t.Fail()
 	}
-	p1.Reset()
+	SystemConstant = 0.6
 }
 
 func TestInitialize(t *testing.T) {
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
-	phi := toPhi(p1.Deviation)
-	ti := totalImpact(&p1.History)
-	variance := variance(ti)
-	delta := delta(variance, &p1.History)
-	a := toAlpha(p1.Volatility)
-	A, B := initializeComparison(p1.Volatility, variance, phi, delta, a)
+	sigma := 0.06
+	phi := 1.1513
+	variance := 1.7785
+	delta := -0.4834
+	a := -5.62682
+	SystemConstant = 0.5
+	A, B := initializeComparison(sigma, variance, phi, delta, a)
 	if math.Abs(A - -5.62682) > .00001 {
 		t.Log(A)
 		t.Fail()
@@ -191,6 +187,7 @@ func TestInitialize(t *testing.T) {
 		t.Fail()
 	}
 	p1.Reset()
+	SystemConstant = 0.6
 }
 
 func TestGlicko2(t *testing.T) {

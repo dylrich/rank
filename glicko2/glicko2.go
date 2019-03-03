@@ -14,16 +14,15 @@ const (
 
 	// DefaultInitialVolatility is ...
 	DefaultInitialVolatility = 0.06
-
-	// ConverganceTolerance is ...
-	ConverganceTolerance = 0.000001
-
-	// SystemConstant is ...
-	SystemConstant = 0.6
 )
 
 var (
 	q = math.Ln10 / 400
+	// SystemConstant is ...
+	SystemConstant = 0.6
+
+	// ConverganceTolerance is ...
+	ConverganceTolerance = 0.000001
 )
 
 // Result is ...
@@ -194,7 +193,7 @@ func initializeComparison(sigma, variance, phi, delta, a float64) (float64, floa
 	var A, B float64
 	A = a
 	deltaSquared := math.Pow(delta, 2)
-	if deltaSquared > math.Pow(phi, 2)+variance {
+	if deltaSquared > (math.Pow(phi, 2) + variance) {
 		B = math.Log(deltaSquared - math.Pow(phi, 2) - variance)
 		return A, B
 	}
@@ -202,6 +201,7 @@ func initializeComparison(sigma, variance, phi, delta, a float64) (float64, floa
 	for 0 > illinois(a-k*SystemConstant, phi, variance, a, delta) {
 		k++
 	}
+	B = a - k*SystemConstant
 	return A, B
 }
 
