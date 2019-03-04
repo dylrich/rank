@@ -26,7 +26,6 @@ var (
 )
 
 func TestToMu(t *testing.T) {
-
 	mu := toMu(1400)
 	if math.Abs(mu - -0.5756) > .0001 {
 		t.Log(mu)
@@ -48,7 +47,6 @@ func TestToMu(t *testing.T) {
 }
 
 func TestToPhi(t *testing.T) {
-
 	phi := toPhi(30)
 	if math.Abs(phi-.1727) > .0001 {
 		t.Log(phi)
@@ -69,7 +67,6 @@ func TestToPhi(t *testing.T) {
 }
 
 func TestToG(t *testing.T) {
-
 	g := toG(30.0)
 	if math.Abs(g-.9955) > .0001 {
 		t.Log(g)
@@ -90,7 +87,6 @@ func TestToG(t *testing.T) {
 }
 
 func TestToE(t *testing.T) {
-
 	e := toE(1500, 1400, .9955)
 	if math.Abs(e-.639) > .001 {
 		t.Log(e)
@@ -121,7 +117,6 @@ func TestVariance(t *testing.T) {
 
 func TestImpact(t *testing.T) {
 	var i, g, e float64
-
 	g = 0.9955
 	e = 0.639
 	i = impact(g, e)
@@ -209,7 +204,6 @@ func TestIllinois(t *testing.T) {
 		t.Log(ib)
 		t.Fail()
 	}
-	SystemConstant = 0.6
 }
 
 func TestInitialize(t *testing.T) {
@@ -229,7 +223,6 @@ func TestInitialize(t *testing.T) {
 		t.Log(B)
 		t.Fail()
 	}
-	SystemConstant = 0.6
 }
 
 func TestVolatility(t *testing.T) {
@@ -243,7 +236,6 @@ func TestVolatility(t *testing.T) {
 		t.Log(v)
 		t.Fail()
 	}
-	SystemConstant = 0.6
 }
 
 func TestPhiPrime(t *testing.T) {
@@ -306,5 +298,4 @@ func TestGlicko2(t *testing.T) {
 		t.Log(outcome.Deviation)
 		t.Fail()
 	}
-	SystemConstant = 0.6
 }
