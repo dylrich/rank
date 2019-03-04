@@ -7,8 +7,8 @@ import (
 
 var (
 	p1 = NewPlayer(Parameters{
-		InitialDeviation: DefaultInitialDeviation,
-		InitialRating:    DefaultInitialRating,
+		InitialDeviation: 200,
+		InitialRating:    1500,
 	})
 	p2 = NewPlayer(Parameters{
 		InitialDeviation: 30,
@@ -21,22 +21,6 @@ var (
 	p4 = NewPlayer(Parameters{
 		InitialDeviation: 300,
 		InitialRating:    1700,
-	})
-	p5 = NewPlayer(Parameters{
-		InitialDeviation: 200,
-		InitialRating:    1500,
-	})
-	p6 = NewPlayer(Parameters{
-		InitialDeviation: 200,
-		InitialRating:    1500,
-	})
-	p7 = NewPlayer(Parameters{
-		InitialDeviation: 200,
-		InitialRating:    1500,
-	})
-	p8 = NewPlayer(Parameters{
-		InitialDeviation: 200,
-		InitialRating:    1500,
 	})
 )
 
@@ -81,54 +65,28 @@ func TestToE(t *testing.T) {
 }
 
 func TestDSquared(t *testing.T) {
-	p5.addResult(p2, 1)
-	p5.addResult(p3, 0)
-	p5.addResult(p4, 0)
-	ds := p5.dsquared()
+	p1.Reset()
+	p1.addResult(p2, 1)
+	p1.addResult(p3, 0)
+	p1.addResult(p4, 0)
+	ds := dsquared(&p1.History)
 	if math.Abs(ds-53685.74) > 0.01 {
 		t.Log(ds)
 		t.Fail()
 	}
 }
 
-func TestWin(t *testing.T) {
-	p6.addResult(p3, 0)
-	p6.addResult(p4, 0)
-	p6.Win(p2)
-	if math.Abs(p6.Rating-1464.1) > 0.1 {
-		t.Log(p6.Rating, p6.Deviation)
+func TestGlicko(t *testing.T) {
+	p1.Reset()
+	p1.Win(p2)
+	p1.Lose(p3)
+	outcome := p1.Lose(p4)
+	if math.Abs(outcome.Rating-1464.1) > 0.1 {
+		t.Log(outcome.Rating, outcome.Deviation)
 		t.Fail()
 	}
-	if math.Abs(p6.Deviation-151.4) > 0.1 {
-		t.Log(p6.Rating, p6.Deviation)
-		t.Fail()
-	}
-}
-
-func TestLose(t *testing.T) {
-	p7.addResult(p3, 0)
-	p7.addResult(p4, 0)
-	p7.Lose(p2)
-	if math.Abs(p7.Rating-1332.7) > 0.1 {
-		t.Log(p7.Rating, p7.Deviation)
-		t.Fail()
-	}
-	if math.Abs(p7.Deviation-151.4) > 0.1 {
-		t.Log(p7.Rating, p7.Deviation)
-		t.Fail()
-	}
-}
-
-func TestDraw(t *testing.T) {
-	p8.addResult(p3, 0)
-	p8.addResult(p4, 0)
-	p8.Draw(p2)
-	if math.Abs(p8.Rating-1398.4) > 0.1 {
-		t.Log(p8.Rating, p8.Deviation)
-		t.Fail()
-	}
-	if math.Abs(p8.Deviation-151.4) > 0.1 {
-		t.Log(p8.Rating, p8.Deviation)
+	if math.Abs(outcome.Deviation-151.4) > 0.1 {
+		t.Log(outcome.Rating, outcome.Deviation)
 		t.Fail()
 	}
 }

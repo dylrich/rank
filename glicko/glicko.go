@@ -54,54 +54,30 @@ func NewPlayer(p Parameters) *Player {
 }
 
 // Win is called when a player has won a match against another player, earning a Glicko score of 1. This function will handle adding the result to the history of the player who wins only. To add the loss record to the opponent's history, call Opponent.Loss(Player) as appropriate.
-func (p *Player) Win(o *Player) *Outcome {
+func (p *Player) Win(o *Player) Outcome {
 	p.addResult(o, 1)
-	ratingPrime := p.ratingPrime()
-	DeviationPrime := p.deviationPrime()
-	ratingDelta := ratingPrime - p.Rating
-	DeviationDelta := DeviationPrime - p.Deviation
-	p.Rating = ratingPrime
-	p.Deviation = DeviationPrime
-	return &Outcome{
-		Rating:         p.Rating,
-		RatingDelta:    ratingDelta,
-		Deviation:      DeviationPrime,
-		DeviationDelta: DeviationDelta,
-	}
+	outcome := p.getOutcome()
+	p.Rating = outcome.Rating
+	p.Deviation = outcome.Deviation
+	return outcome
 }
 
 // Lose is called when a player has won a match against another player, earning a Glicko score of 0. This function will handle adding the result to the history of the player who loses only. To add the win record to the opponent's history, call Opponent.Win(Player) as appropriate.
-func (p *Player) Lose(o *Player) *Outcome {
+func (p *Player) Lose(o *Player) Outcome {
 	p.addResult(o, 0)
-	ratingPrime := p.ratingPrime()
-	DeviationPrime := p.deviationPrime()
-	ratingDelta := ratingPrime - p.Rating
-	DeviationDelta := DeviationPrime - p.Deviation
-	p.Rating = ratingPrime
-	p.Deviation = DeviationPrime
-	return &Outcome{
-		Rating:         p.Rating,
-		RatingDelta:    ratingDelta,
-		Deviation:      DeviationPrime,
-		DeviationDelta: DeviationDelta,
-	}
+	outcome := p.getOutcome()
+	p.Rating = outcome.Rating
+	p.Deviation = outcome.Deviation
+	return outcome
 }
 
 // Draw is called when a player has tied in a match against another player, earning a Glicko score of 0.5. This function will handle adding the result to the history of the player this method is called on only. To add the draw record to the opponent's history, call Opponent.Draw(Player) as appropriate.
-func (p *Player) Draw(o *Player) *Outcome {
+func (p *Player) Draw(o *Player) Outcome {
 	p.addResult(o, 0.5)
-	ratingPrime := p.ratingPrime()
-	DeviationPrime := p.deviationPrime()
-	ratingDelta := ratingPrime - p.Rating
-	DeviationDelta := DeviationPrime - p.Deviation
-	p.Rating = ratingPrime
-	p.Deviation = DeviationPrime
-	return &Outcome{
-		Rating:         p.Rating,
-		RatingDelta:    ratingDelta,
-		Deviation:      DeviationPrime,
-		DeviationDelta: DeviationDelta,
-	}
+	outcome := p.getOutcome()
+	p.Rating = outcome.Rating
+	p.Deviation = outcome.Deviation
+	return outcome
 }
 
 // Reset will wipe the calling Player's history completely, and revert the current Rating and Deviation to the initial values.
@@ -116,6 +92,18 @@ func (p *Player) NewPeriod() {
 	p.Parameters.InitialDeviation = p.Deviation
 	p.Parameters.InitialRating = p.Rating
 	p.Reset()
+}
+
+func (p *Player) getOutcome() Outcome {
+	ds := deviationScore(p.Parameters.InitialDeviation, &p.History)
+	rp := ratingPrime(p.Parameters.InitialRating, ds, &p.History)
+	dp := deviationPrime(ds)
+	return Outcome{
+		Rating:         rp,
+		RatingDelta:    rp - p.Rating,
+		Deviation:      dp,
+		DeviationDelta: dp - p.Deviation,
+	}
 }
 
 func (p *Player) addResult(o *Player, score float64) {
@@ -137,42 +125,41 @@ func toE(playerRating, opponentRating, opponentG float64) float64 {
 	return 1 / (1 + math.Pow(10, -opponentG*(playerRating-opponentRating)/400))
 }
 
-func ratingDelta(r1, r2 float64) float64 {
-	return r1 - r2
+func dsquared(history *[]Result) float64 {
+	return math.Pow(math.Pow(q, 2)*totalImpact(history), -1)
 }
 
-func (p *Player) dsquared() float64 {
-	ti := 0.0
-	for _, r := range p.History {
-		ti += impact(r.G, r.E)
-	}
-	return math.Pow(math.Pow(q, 2)*ti, -1)
+func ratingPrime(rating, deviationScore float64, history *[]Result) float64 {
+	return rating + (q/deviationScore)*totalResultScore(history)
+}
+
+func deviationPrime(deviationScore float64) float64 {
+	return math.Sqrt(math.Pow(deviationScore, -1))
+}
+
+func deviationScore(deviation float64, history *[]Result) float64 {
+	return (1 / math.Pow(deviation, 2)) + (1 / dsquared(history))
 }
 
 func impact(g, e float64) float64 {
 	return math.Pow(g, 2) * e * (1 - e)
 }
 
-func (p *Player) g() float64 {
-	return 1 / math.Sqrt(1+(3*math.Pow(q, 2)*math.Pow(p.Deviation, 2)/math.Pow(math.Pi, 2)))
-}
-
-func (p *Player) ratingPrime() float64 {
-	adjustment := 0.0
-	for _, r := range p.History {
-		adjustment += adjust(r.G, r.E, r.Score)
+func totalImpact(history *[]Result) float64 {
+	tv := 0.0
+	for _, result := range *history {
+		tv += impact(result.G, result.E)
 	}
-	return p.Rating + (q/p.deviationAdjustment())*adjustment
+	return tv
 }
 
-func (p *Player) deviationPrime() float64 {
-	return math.Sqrt(math.Pow(p.deviationAdjustment(), -1))
+func resultScore(g, s, e float64) float64 {
+	return g * (s - e)
 }
-
-func (p *Player) deviationAdjustment() float64 {
-	return (1 / math.Pow(p.Deviation, 2)) + (1 / p.dsquared())
-}
-
-func adjust(g, e, score float64) float64 {
-	return g * (score - e)
+func totalResultScore(history *[]Result) float64 {
+	ts := 0.0
+	for _, result := range *history {
+		ts += resultScore(result.G, result.Score, result.E)
+	}
+	return ts
 }
