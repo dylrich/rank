@@ -23,7 +23,7 @@ import (
 )
 
 func main(){
-    params := elo.Parameters{Rating: elo.DefaultInitialRating}
+    params := elo.Parameters{InitialRating: elo.DefaultInitialRating}
     p1 := elo.NewPlayer(params)
     p2 := elo.NewPlayer(params)
 
@@ -33,8 +33,8 @@ func main(){
     p1Outcome := p1.Win(p2Rating)
     p2Outcome := p2.Lose(p1Rating)
 
-    fmt.Printf("Player 1's rating is now %s (%s)", p1Outcome.Rating, p1Outcome.RatingDelta)
-    fmt.Printf("Player 2's rating is now %s (%s)", p2Outcome.Rating, p2Outcome.RatingDelta)
+    fmt.Printf("Player 1's rating is now %v (%v)", p1Outcome.Rating, p1Outcome.RatingDelta)
+    fmt.Printf("Player 2's rating is now %v (%v)", p2Outcome.Rating, p2Outcome.RatingDelta)
 }
 ```
 
@@ -58,8 +58,8 @@ import (
 
 func main(){
     params := glicko.Parameters{
-        Rating: glicko.DefaultInitialRating,
-        Deviation: glicko.DefaultInitialDeviation,
+        InitialRating: glicko.DefaultInitialRating,
+        InitialDeviation: glicko.DefaultInitialDeviation,
         }
     p1 := glicko.NewPlayer(params)
     p2 := glicko.NewPlayer(params)
@@ -67,8 +67,8 @@ func main(){
     p1Outcome := p1.Win(p2)
     p2Outcome := p2.Lose(p1)
 
-    fmt.Printf("Player 1's rating is now %s (%s) with a deviation of %s (%s)", p1Outcome.Rating, p1Outcome.RatingDelta, p1Outcome.Deviation, p1Outcome.DeviationDelta)
-    fmt.Printf("Player 2's rating is now %s (%s) with a deviation of %s (%s)", p2Outcome.Rating, p2Outcome.RatingDelta, p2Outcome.Deviation, p2Outcome.DeviationDelta)
+    fmt.Printf("Player 1's rating is now %v (%v) with a deviation of %v (%v)", p1Outcome.Rating, p1Outcome.RatingDelta, p1Outcome.Deviation, p1Outcome.DeviationDelta)
+    fmt.Printf("Player 2's rating is now %v (%v) with a deviation of %v (%v)", p2Outcome.Rating, p2Outcome.RatingDelta, p2Outcome.Deviation, p2Outcome.DeviationDelta)
 }
 ```
 
@@ -92,9 +92,9 @@ import (
 
 func main(){
     params := glicko2.Parameters{
-        Rating: glicko2.DefaultInitialRating,
-        Deviation: glicko2.DefaultInitialDeviation,
-        Volatility: glicko2.DefaultInitialVolatility,
+        InitialRating: glicko2.DefaultInitialRating,
+        InitialDeviation: glicko2.DefaultInitialDeviation,
+        InitialVolatility: glicko2.DefaultInitialVolatility,
         }
 
     p1 := glicko2.NewPlayer(params)
@@ -103,8 +103,8 @@ func main(){
     p1Outcome := p1.Win(p2)
     p2Outcome := p2.Lose(p1)
 
-    fmt.Printf("Player 1's rating is now %s (%s) with a deviation of %s (%s) and volatility of %s (%s)", p1Outcome.Rating, p1Outcome.RatingDelta, p1Outcome.Deviation, p1Outcome.DeviationDelta, p1Outcome.Volatility, p1Outcome.VolatilityDelta)
-    fmt.Printf("Player 2's rating is now %s (%s) with a deviation of %s (%s) and volatility of %s (%s)", p2Outcome.Rating, p2Outcome.RatingDelta, p2Outcome.Deviation, p2Outcome.DeviationDelta, p2Outcome.Volatility, p2Outcome.VolatilityDelta)
+    fmt.Printf("Player 1's rating is now %v (%v) with a deviation of %v (%v) and volatility of %v (%v)", p1Outcome.Rating, p1Outcome.RatingDelta, p1Outcome.Deviation, p1Outcome.DeviationDelta, p1Outcome.Volatility, p1Outcome.VolatilityDelta)
+    fmt.Printf("Player 2's rating is now %v (%v) with a deviation of %v (%v) and volatility of %v (%v)", p2Outcome.Rating, p2Outcome.RatingDelta, p2Outcome.Deviation, p2Outcome.DeviationDelta, p2Outcome.Volatility, p2Outcome.VolatilityDelta)
 }
 ```
 
