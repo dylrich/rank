@@ -6,13 +6,13 @@ import (
 
 const (
 
-	// DefaultInitialDeviation is the standard value for an initial deviation for players that have no result history from the previous rating period
+	// DefaultInitialDeviation is the standard value for an initial deviation for players that have no result history from the previous rating period.
 	DefaultInitialDeviation = 350
 
-	// DefaultInitialRating is the standard value for an initial rating for players that have no result history from the previous rating period
+	// DefaultInitialRating is the standard value for an initial rating for players that have no result history from the previous rating period.
 	DefaultInitialRating = 1500
 
-	// DefaultInitialVolatility is the standard value for an initial volatility for players that have no result history from the previous rating period
+	// DefaultInitialVolatility is the standard value for an initial volatility for players that have no result history from the previous rating period.
 	DefaultInitialVolatility = 0.06
 )
 
@@ -26,11 +26,6 @@ var (
 	ConverganceTolerance = 0.000001
 )
 
-// Result contains the important information from a match that has occurred. The information is used to calculate new ratings when new results are added.
-type Result struct {
-	Rating, Deviation, G, E, Score float64
-}
-
 // Player represents an individual participant in the competition. The Player struct contains the Rating, Deviation, and Volatility measures which all compose the Glicko2 system's estimation of how skilled that player is as well as how reliable that estimation is. These values are all moment-in-time snapshots, and will be updated on any new results for that player. The Parameters attribute contains initial values for that player which can be used to reconstruct the player's current rating from scratch when combined with the History data. Parameters should be altered at the beginning of a new rating period to be the final Rating, Deviation, and Volatility values of the previous period.
 type Player struct {
 	Rating     float64
@@ -43,6 +38,11 @@ type Player struct {
 // Parameters contains initial values for a player. These are set on instantiation of the player, and can be altered later by using the Player.NewPeriod() method.
 type Parameters struct {
 	InitialDeviation, InitialRating, InitialVolatility float64
+}
+
+// Result contains the important information from a match that has occurred. The information is used to calculate new ratings when new results are added.
+type Result struct {
+	Rating, Deviation, G, E, Score float64
 }
 
 // Outcome is a snapshot of the current state for a player, including delta values for each Deviation, Rating, and Volatility change. This information can be passed to users to give them an idea of how much the most recent result has impacted their ranking criteria.
@@ -65,7 +65,7 @@ func NewPlayer(p Parameters) *Player {
 	return &Player{Rating: p.InitialRating, Deviation: p.InitialDeviation, Volatility: p.InitialVolatility, Parameters: p}
 }
 
-// Win is called when a player has won a match against another player, earning a Glicko2 score of 1. This function will handle adding the result to the history of the player who wins only. To add the loss record to the opponent's history, call Opponent.Loss(Player) as appropriate.
+// Win is called when a player has won a match against another player, earning a Glicko2 score of 1. This function will handle adding the result to the history of the player who wins only. To add the loss record to the opponent's history, call Opponent.Lose(Player) as appropriate.
 func (p *Player) Win(o *Player) Outcome {
 	p.addResult(o, 1)
 	outcome := p.getOutcome()
