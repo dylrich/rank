@@ -66,8 +66,8 @@ func NewPlayer(p Parameters) *Player {
 }
 
 // Win is called when a player has won a match against another player, earning a Glicko2 score of 1. This function will handle adding the result to the history of the player who wins only. To add the loss record to the opponent's history, call Opponent.Lose(Player) as appropriate.
-func (p *Player) Win(o *Player) Outcome {
-	p.addResult(o, 1)
+func (p *Player) Win(rating, deviation float64) Outcome {
+	p.addResult(rating, deviation, 1)
 	outcome := p.getOutcome()
 	p.Deviation = outcome.Deviation
 	p.Rating = outcome.Rating
@@ -76,8 +76,8 @@ func (p *Player) Win(o *Player) Outcome {
 }
 
 // Lose is called when a player has won a match against another player, earning a Glicko2 score of 0. This function will handle adding the result to the history of the player who loses only. To add the win record to the opponent's history, call Opponent.Win(Player) as appropriate.
-func (p *Player) Lose(o *Player) Outcome {
-	p.addResult(o, 0)
+func (p *Player) Lose(rating, deviation float64) Outcome {
+	p.addResult(rating, deviation, 0)
 	outcome := p.getOutcome()
 	p.Deviation = outcome.Deviation
 	p.Rating = outcome.Rating
@@ -86,8 +86,8 @@ func (p *Player) Lose(o *Player) Outcome {
 }
 
 // Draw is called when a player has tied in a match against another player, earning a Glicko2 score of 0.5. This function will handle adding the result to the history of the player this method is called on only. To add the draw record to the opponent's history, call Opponent.Draw(Player) as appropriate.
-func (p *Player) Draw(o *Player) Outcome {
-	p.addResult(o, 0.5)
+func (p *Player) Draw(rating, deviation float64) Outcome {
+	p.addResult(rating, deviation, 0.5)
 	outcome := p.getOutcome()
 	p.Deviation = outcome.Deviation
 	p.Rating = outcome.Rating
@@ -111,14 +111,14 @@ func (p *Player) NewPeriod() {
 	p.Reset()
 }
 
-func (p *Player) addResult(o *Player, score float64) {
+func (p *Player) addResult(rating, deviation, score float64) {
 	var r Result
-	r.Deviation = o.Deviation
-	r.Rating = o.Rating
+	r.Deviation = deviation
+	r.Rating = rating
 	r.Score = score
-	g := toG(o.Parameters.InitialDeviation)
+	g := toG(deviation)
 	r.G = g
-	r.E = toE(p.Parameters.InitialRating, o.Parameters.InitialRating, g)
+	r.E = toE(p.Parameters.InitialRating, rating, g)
 	p.History = append(p.History, r)
 }
 

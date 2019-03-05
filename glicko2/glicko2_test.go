@@ -144,9 +144,9 @@ func TestImpact(t *testing.T) {
 
 func TestTotalImpact(t *testing.T) {
 	p1.Reset()
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
+	p1.addResult(p2.Rating, p2.Deviation, 1)
+	p1.addResult(p3.Rating, p3.Deviation, 0)
+	p1.addResult(p4.Rating, p4.Deviation, 0)
 	ti := totalImpact(&p1.History)
 
 	if math.Abs(ti-0.5621) > .0001 {
@@ -157,9 +157,9 @@ func TestTotalImpact(t *testing.T) {
 
 func TestTotalResultScore(t *testing.T) {
 	p1.Reset()
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
+	p1.addResult(p2.Rating, p2.Deviation, 1)
+	p1.addResult(p3.Rating, p3.Deviation, 0)
+	p1.addResult(p4.Rating, p4.Deviation, 0)
 	rs := totalResultScore(&p1.History)
 	if math.Abs(rs - -0.2720) > .0001 {
 		t.Log(rs)
@@ -281,9 +281,9 @@ func TestFromPhi(t *testing.T) {
 func TestGlicko2(t *testing.T) {
 	p1.Reset()
 	SystemConstant = 0.5
-	p1.Win(p2)
-	p1.Lose(p3)
-	outcome := p1.Lose(p4)
+	p1.Win(p2.Rating, p2.Deviation)
+	p1.Lose(p3.Rating, p3.Deviation)
+	outcome := p1.Lose(p4.Rating, p4.Deviation)
 	if math.Abs(outcome.Rating-1464.06) > .01 {
 		t.Log(outcome)
 		t.Fail()
@@ -297,5 +297,12 @@ func TestGlicko2(t *testing.T) {
 	if math.Abs(outcome.Deviation-151.52) > .01 {
 		t.Log(outcome.Deviation)
 		t.Fail()
+	}
+}
+
+func BenchmarkGlicko2(b *testing.B) {
+	p1.Reset()
+	for n := 0; n < b.N; n++ {
+		p1.Win(p2.Rating, p2.Deviation)
 	}
 }

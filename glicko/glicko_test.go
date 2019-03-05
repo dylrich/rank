@@ -66,9 +66,9 @@ func TestToE(t *testing.T) {
 
 func TestDSquared(t *testing.T) {
 	p1.Reset()
-	p1.addResult(p2, 1)
-	p1.addResult(p3, 0)
-	p1.addResult(p4, 0)
+	p1.addResult(p2.Rating, p2.Deviation, 1)
+	p1.addResult(p3.Rating, p3.Deviation, 0)
+	p1.addResult(p4.Rating, p4.Deviation, 0)
 	ds := dsquared(&p1.History)
 	if math.Abs(ds-53685.74) > 0.01 {
 		t.Log(ds)
@@ -78,9 +78,9 @@ func TestDSquared(t *testing.T) {
 
 func TestGlicko(t *testing.T) {
 	p1.Reset()
-	p1.Win(p2)
-	p1.Lose(p3)
-	outcome := p1.Lose(p4)
+	p1.Win(p2.Rating, p2.Deviation)
+	p1.Lose(p3.Rating, p3.Deviation)
+	outcome := p1.Lose(p4.Rating, p4.Deviation)
 	if math.Abs(outcome.Rating-1464.1) > 0.1 {
 		t.Log(outcome.Rating, outcome.Deviation)
 		t.Fail()
@@ -88,5 +88,12 @@ func TestGlicko(t *testing.T) {
 	if math.Abs(outcome.Deviation-151.4) > 0.1 {
 		t.Log(outcome.Rating, outcome.Deviation)
 		t.Fail()
+	}
+}
+
+func BenchmarkGlicko(b *testing.B) {
+	p1.Reset()
+	for n := 0; n < b.N; n++ {
+		p1.Win(p2.Rating, p2.Deviation)
 	}
 }
