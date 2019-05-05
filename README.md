@@ -102,6 +102,9 @@ func main(){
         InitialDeviation: glicko2.DefaultInitialDeviation,
         InitialVolatility: glicko2.DefaultInitialVolatility,
         }
+        
+    p1 := glicko2.NewPlayer(params)
+    p2 := glicko2.NewPlayer(params)
 
     p1Rating := p1.Rating
     p1Deviation := p1.Deviation
